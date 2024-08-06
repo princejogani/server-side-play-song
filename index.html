@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to SSPS</title>
+</head>
+
+<body>
+    Exapmel URL: https://www.youtube.com/watch?v=kw4tT7SCmaY
+    <form onsubmit="sendMessage(event)">
+        <br />
+        <div class="form">
+            <input class="input-msg" type="text" id="messageInput" placeholder="Enter URL" />
+            <button class="btn-send" type="submit">Send</button>
+        </div>
+        <br />
+    </form>
+
+    <iframe id="iframe" frameborder="0" allowfullscreen="1"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        title="yt" width="320" height="180"
+        src="https://www.youtube.com/embed/loader?autoplay=1&amp;mute=1&amp;modestbranding=1&amp;rel=0&amp;enablejsapi=1&amp;origin=https%3A%2F%2Fsandesh.com&amp;widgetid=5"
+        id="widget6" data-gtm-yt-inspected-4="true" data-gtm-yt-inspected-16="true" data-gtm-yt-inspected-23="true">
+    </iframe>
+    <div id="yt-controls">
+        <br />
+        <button id="pause-video" class="btn btn-send" onClick="controlVideo('pauseVideo');">
+            Pause
+        </button>
+        <button id="play-video" class="btn btn-send d-none" onClick="controlVideo('playVideo');">
+            Play
+        </button>
+        <!-- <button class="btn-PIP" onClick="playPIP();">PIP</button> -->
+        <br /><br />
+    </div>
+    <div id="output"></div>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        const socket = new WebSocket(window.location.href.replace("https://", "wss://"));
+
+        socket.onmessage = (event) => {
+            const message = event.data;
+            if (message.includes("Video")) {
+                var iframe = document.getElementsByTagName("iframe")[0].contentWindow;
+                iframe.postMessage(
+                    '{"event":"command","func":"' + message + '","args":""}',
+                    "*",
+                );
+            } else {
+                document.getElementById("output").innerHTML += `<p>${message}</p>`;
+                let id;
+                if (message.includes("youtu.be")) {
+                    id = message.split("?si=")[0].replace("https://youtu.be/", "");
+                } else {
+                    id = message.split("?v=")[1];
+                    if (id?.includes("&")) {
+                        id = id.split("&")[0];
+                    }
+                }
+                let url = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&enablejsapi=1`;
+                document.getElementById("iframe").src = url;
+            }
+        };
+
+        function sendMessage(e) {
+            e.preventDefault();
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value;
+            if (
+                message.includes("youtu.be/") ||
+                message.includes("youtube.com/") ||
+                message.includes("server")
+            ) {
+                socket.send(message);
+            }
+            messageInput.value = "";
+        }
+
+        function controlVideo(vidFunc) {
+            socket.send(vidFunc);
+            if (vidFunc == "pauseVideo") {
+                document.getElementById("pause-video").classList.add("d-none");
+                document.getElementById("play-video").classList.remove("d-none");
+            } else if (vidFunc == "playVideo") {
+                document.getElementById("play-video").classList.add("d-none");
+                document.getElementById("pause-video").classList.remove("d-none");
+            }
+        }
+
+        function playPIP() {
+            // setInterval(() => {
+            //   console.log(document.querySelector(".ytp-pip-button.ytp-button"));
+            //   if (document.querySelector(".ytp-pip-button.ytp-button")) {
+            //     document.querySelector(".ytp-pip-button.ytp-button").style.display =
+            //       "inline";
+            //   }
+            // }, 1000);
+            // const iframe = document.querySelector("iframe");
+            const iframe = document.getElementById("iframe");
+            const video = iframe.contentWindow;
+
+            // Request Picture-in-Picture
+            console.log(video);
+            if (video) {
+                // video.document
+                //   .requestPictureInPicture()
+                //   .then(() => {
+                //     console.log("Entered Picture-in-Picture mode");
+                //   })
+                //   .catch((error) => {
+                //     console.error("Failed to enter Picture-in-Picture mode", error);
+                //   });
+            }
+        }
+    </script>
+    <style>
+        .d-none {
+            display: none;
+        }
+
+        .form {
+            height: 50px;
+            min-height: 50px;
+        }
+
+        .input-msg {
+            width: 200px;
+            height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 5px 18px;
+            font-size: 16px;
+            background: transparent;
+        }
+
+        .btn-send {
+            height: 50px;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 16px;
+            background: transparent;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .ytp-pip-button {
+            display: inline !important;
+        }
+    </style>
+</body>
+
+</html>
