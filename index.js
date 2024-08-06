@@ -1,9 +1,9 @@
 // server.js
 const WebSocket = require("ws");
-const http = require("http");
+const https = require("https");
 const fs = require("fs");
 
-const server = http.createServer((req, res) => {
+const server = https.createServer((req, res) => {
     const html = fs.readFileSync("index.html", "utf8");
     res.writeHead(200, { "Content-Type": "text/html" });
     res.end(html);
